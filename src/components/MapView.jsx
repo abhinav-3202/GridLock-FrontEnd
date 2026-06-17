@@ -1,10 +1,13 @@
-import  { useEffect } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet'
+import { useEffect, useRef } from 'react'
+import Map, { Marker, Popup } from 'react-map-gl/maplibre'
+
+// Ensure maplibre's core structural CSS styles are loaded
+import 'maplibre-gl/dist/maplibre-gl.css'
 
 function getColor(score) {
-  if (score >= 9) return '#ef4444'
-  if (score >= 7) return '#f97316'
-  return '#eab308'
+  if (score >= 9) return '#ef4444' // Red
+  if (score >= 7) return '#f97316' // Orange
+  return '#eab308'                 // Yellow
 }
 
 function getRadius(count) {
@@ -14,60 +17,94 @@ function getRadius(count) {
   return 12
 }
 
-function FlyToZone({ selectedZone }) {
-  const map = useMap()
-  useEffect(() => {
-    if (selectedZone) {
-      map.flyTo([selectedZone.lat, selectedZone.lng], 15, { duration: 1.2 })
-    }
-  }, [selectedZone, map])
-  return null
-}
-
 export default function MapView({ hotspots, onZoneClick, selectedZone }) {
+  const mapRef = useRef(null)
+
+  // Replaces Leaflet's custom FlyTo component by directly accessing the Map instance
+  useEffect(() => {
+    if (selectedZone && mapRef.current) {
+      mapRef.current.flyTo({
+        center: [selectedZone.lng, selectedZone.lat], // maplibre expects [lng, lat]
+        zoom: 15,
+        duration: 1200, // 1.2 seconds smooth transition
+        essential: true
+      })
+    }
+  }, [selectedZone])
+
   if (!hotspots) return null
 
   return (
-    <div className="rounded-xl overflow-hidden border border-gray-700 h-full">
-      <MapContainer
-        center={[12.9716, 77.5946]}
-        zoom={12}
-        style={{ height: '100%', width: '100%' }}
-        zoomControl={true}
+    <div className="rounded-xl overflow-hidden border border-gray-200 h-full w-full relative">
+      <Map
+        ref={mapRef}
+        initialViewState={{
+          longitude: 77.5946,
+          latitude: 12.9716,
+          zoom: 12
+        }}
+        // Using CartoDB's free crisp, clean light vector map tile configuration
+        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+        style={{ width: '100%', height: '100%' }}
       >
-        <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        
+        {/* Render Hotspot Markers */}
+        {hotspots.map((zone) => {
+          const isSelected = selectedZone?.zone_id === zone.zone_id
+          const radiusSize = getRadius(zone.violation_count)
+          const zoneColor = getColor(zone.congestion_score)
 
-        <FlyToZone selectedZone={selectedZone} />
+          return (
+            <Marker 
+              key={zone.zone_id} 
+              longitude={zone.lng} 
+              latitude={zone.lat}
+              anchor="center"
+            >
+              {/* Dynamic Vector Style Circles using Tailwind styling */}
+              <div
+                onClick={() => onZoneClick(zone)}
+                className="rounded-full transition-all duration-200 cursor-pointer shadow-md"
+                style={{
+                  width: `${radiusSize * 2}px`,
+                  height: `${radiusSize * 2}px`,
+                  backgroundColor: zoneColor,
+                  opacity: isSelected ? 0.95 : 0.6,
+                  border: isSelected ? `3px solid #ffffff` : `1.5px solid #ffffff`,
+                  transform: isSelected ? 'scale(1.15)' : 'scale(1)'
+                }}
+              />
+            </Marker>
+          )
+        })}
 
-        {hotspots.map((zone) => (
-          <CircleMarker
-            key={zone.zone_id}
-            center={[zone.lat, zone.lng]}
-            radius={getRadius(zone.violation_count)}
-            pathOptions={{
-              color: getColor(zone.congestion_score),
-              fillColor: getColor(zone.congestion_score),
-              fillOpacity: selectedZone?.zone_id === zone.zone_id ? 0.95 : 0.6,
-              weight: selectedZone?.zone_id === zone.zone_id ? 3 : 1.5,
-            }}
-            eventHandlers={{
-              click: () => onZoneClick(zone),
-            }}
+        {/* Selected Zone Vector Popup Details */}
+        {selectedZone && (
+          <Popup
+            longitude={selectedZone.lng}
+            latitude={selectedZone.lat}
+            anchor="bottom"
+            closeButton={false}
+            offset={getRadius(selectedZone.violation_count)}
           >
-            <Popup>
-              <div className="text-sm">
-                <p className="font-bold">{zone.label}</p>
-                <p>Score: {zone.congestion_score}</p>
-                <p>Violations: {zone.violation_count.toLocaleString()}</p>
-                <p>Peak: {zone.peak_hour}</p>
-              </div>
-            </Popup>
-          </CircleMarker>
-        ))}
-      </MapContainer>
+            <div className="text-sm font-sans bg-white text-gray-900 p-1 min-w-[140px]">
+              <p className="font-bold border-b border-gray-200 pb-1 mb-1 text-gray-900">
+                {selectedZone.label}
+              </p>
+              <p className="text-gray-600">
+                <span className="font-semibold text-gray-800">Score:</span> {selectedZone.congestion_score}
+              </p>
+              <p className="text-gray-600">
+                <span className="font-semibold text-gray-800">Violations:</span> {selectedZone.violation_count.toLocaleString()}
+              </p>
+              <p className="text-gray-600">
+                <span className="font-semibold text-gray-800">Peak:</span> {selectedZone.peak_hour}
+              </p>
+            </div>
+          </Popup>
+        )}
+        
+      </Map>
     </div>
   )
 }
