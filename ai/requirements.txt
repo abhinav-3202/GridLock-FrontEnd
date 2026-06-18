@@ -1,0 +1,26 @@
+# Deep Learning
+
+
+# YOLO
+ultralytics
+
+# Computer Vision
+opencv-python
+cvzone
+
+# Data Processing
+numpy
+pandas
+scipy
+
+# Visualization
+matplotlib
+
+# API
+fastapi
+uvicorn
+python-multipart
+
+filterpy
+scikit-image
+lap
