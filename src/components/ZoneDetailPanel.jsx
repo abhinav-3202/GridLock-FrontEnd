@@ -1,113 +1,135 @@
-// import React from 'react'
+import { useTheme } from '../ThemeContext'
 
-function StatRow({ label, value, valueColor }) {
+function getScoreColor(score) {
+  if (score >= 9) return '#ef4444'
+  if (score >= 7) return '#f97316'
+  return '#eab308'
+}
+function getGapColor(gap) {
+  if (gap === 'HIGH') return '#ef4444'
+  if (gap === 'MEDIUM') return '#f97316'
+  return '#eab308'
+}
+
+function StatRow({ label, value, valueColor, theme }) {
   return (
-    <div className="flex justify-between items-center py-2 border-b border-gray-800">
-      <span className="text-gray-400 text-xs">{label}</span>
-      <span className={`text-xs font-semibold ${valueColor || 'text-white'}`}>{value}</span>
+    <div style={{
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: '10px 0',
+      borderBottom: `1px solid ${theme.panelRowDivider}`,
+    }}>
+      <span style={{ color: theme.textSecondary, fontSize: '12px', transition: 'color 0.3s ease' }}>{label}</span>
+      <span style={{ color: valueColor || theme.textPrimary, fontSize: '12px', fontWeight: 600, transition: 'color 0.3s ease' }}>{value}</span>
     </div>
   )
 }
 
-function getScoreColor(score) {
-  if (score >= 9) return 'text-red-400'
-  if (score >= 7) return 'text-orange-400'
-  return 'text-yellow-400'
-}
-
-function getGapColor(gap) {
-  if (gap === 'HIGH') return 'text-red-400'
-  if (gap === 'MEDIUM') return 'text-orange-400'
-  return 'text-yellow-400'
-}
-
 export default function ZoneDetailPanel({ zone, onClose }) {
+  const { theme } = useTheme()
   if (!zone) return null
 
   const resolutionPercent = (zone.resolution_rate * 100).toFixed(0)
+  const scoreColor = getScoreColor(zone.congestion_score)
+  const scoreBarBg = zone.congestion_score >= 9 ? '#ef4444' : zone.congestion_score >= 7 ? '#f97316' : '#eab308'
 
   return (
-    <div className="fixed right-0 top-0 h-full w-80 bg-gray-900 border-l border-gray-700 z-50 flex flex-col shadow-2xl">
-      
-      <div className="px-5 py-4 border-b border-gray-700 flex items-start justify-between">
+    <div style={{
+      position: 'fixed', right: 0, top: 0,
+      height: '100%', width: '320px',
+      background: theme.panelBg,
+      borderLeft: `1px solid ${theme.panelBorder}`,
+      zIndex: 50,
+      display: 'flex', flexDirection: 'column',
+      boxShadow: '-4px 0 24px rgba(0,0,0,0.2)',
+      transition: 'background 0.3s ease',
+    }}>
+
+      {/* Header */}
+      <div style={{
+        padding: '20px',
+        borderBottom: `1px solid ${theme.panelBorder}`,
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+      }}>
         <div>
-          <p className="text-gray-500 text-xs uppercase tracking-widest mb-1">Zone Detail</p>
-          <h2 className="text-white font-semibold text-sm leading-snug">{zone.label}</h2>
+          <p style={{ color: theme.textMuted, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px', transition: 'color 0.3s ease' }}>
+            Zone Detail
+          </p>
+          <h2 style={{ color: theme.textPrimary, fontWeight: 600, fontSize: '14px', margin: 0, lineHeight: 1.3, transition: 'color 0.3s ease' }}>
+            {zone.label}
+          </h2>
         </div>
         <button
           onClick={onClose}
-          className="text-gray-500 hover:text-white text-xl leading-none mt-0.5"
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: theme.textMuted, fontSize: '20px', lineHeight: 1,
+            padding: '2px 6px', borderRadius: '6px',
+            transition: 'color 0.2s ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = theme.textPrimary }}
+          onMouseLeave={e => { e.currentTarget.style.color = theme.textMuted }}
         >
           ✕
         </button>
       </div>
 
-      <div className="px-5 py-4 border-b border-gray-700">
-        <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">Congestion Score</p>
-        <div className="flex items-end gap-2">
-          <span className={`text-5xl font-bold ${getScoreColor(zone.congestion_score)}`}>
+      {/* Score section */}
+      <div style={{ padding: '20px', borderBottom: `1px solid ${theme.panelBorder}` }}>
+        <p style={{ color: theme.textMuted, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px', transition: 'color 0.3s ease' }}>
+          Congestion Score
+        </p>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px' }}>
+          <span style={{ color: scoreColor, fontWeight: 700, fontSize: '48px', lineHeight: 1 }}>
             {zone.congestion_score}
           </span>
-          <span className="text-gray-500 text-sm mb-2">/ 10</span>
+          <span style={{ color: theme.textMuted, fontSize: '14px', marginBottom: '6px' }}>/ 10</span>
         </div>
-        <div className="w-full bg-gray-800 rounded-full h-2 mt-3">
-          <div
-            className="h-2 rounded-full"
-            style={{
-              width: `${(zone.congestion_score / 10) * 100}%`,
-              backgroundColor: zone.congestion_score >= 9
-                ? '#ef4444'
-                : zone.congestion_score >= 7
-                ? '#f97316'
-                : '#eab308'
-            }}
-          />
+        <div style={{ width: '100%', height: '8px', borderRadius: '4px', background: theme.scoreBarBg, marginTop: '12px', overflow: 'hidden' }}>
+          <div style={{
+            height: '100%', borderRadius: '4px',
+            background: scoreBarBg,
+            width: `${(zone.congestion_score / 10) * 100}%`,
+            transition: 'width 0.5s ease',
+          }} />
         </div>
       </div>
 
-      <div className="px-5 py-4 flex-1 overflow-y-auto">
-        <p className="text-gray-500 text-xs uppercase tracking-widest mb-3">Zone Statistics</p>
-        <StatRow
-          label="Total Violations"
-          value={zone.violation_count.toLocaleString()}
-        />
-        <StatRow
-          label="Peak Hour"
-          value={zone.peak_hour}
-          valueColor="text-orange-400"
-        />
-        <StatRow
-          label="Peak Day"
-          value={zone.peak_day}
-        />
-        <StatRow
-          label="Top Vehicle Type"
-          value={zone.top_vehicle}
-        />
-        <StatRow
-          label="Enforcement Gap"
-          value={zone.enforcement_gap}
-          valueColor={getGapColor(zone.enforcement_gap)}
-        />
-        <StatRow
-          label="Resolution Rate"
-          value={`${resolutionPercent}%`}
-          valueColor={zone.resolution_rate >= 0.6 ? 'text-green-400' : 'text-red-400'}
-        />
-        <StatRow
-          label="Zone Rank"
-          value={`#${zone.rank} of 50`}
-        />
+      {/* Stats */}
+      <div style={{ padding: '20px', flex: 1, overflowY: 'auto' }}>
+        <p style={{ color: theme.textMuted, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px', transition: 'color 0.3s ease' }}>
+          Zone Statistics
+        </p>
+        <StatRow label="Total Violations" value={zone.violation_count.toLocaleString()} theme={theme} />
+        <StatRow label="Peak Hour" value={zone.peak_hour} valueColor="#f97316" theme={theme} />
+        <StatRow label="Peak Day" value={zone.peak_day} theme={theme} />
+        <StatRow label="Top Vehicle Type" value={zone.top_vehicle} theme={theme} />
+        <StatRow label="Enforcement Gap" value={zone.enforcement_gap} valueColor={getGapColor(zone.enforcement_gap)} theme={theme} />
+        <StatRow label="Resolution Rate" value={`${resolutionPercent}%`} valueColor={zone.resolution_rate >= 0.6 ? '#22c55e' : '#ef4444'} theme={theme} />
+        <StatRow label="Zone Rank" value={`#${zone.rank} of 50`} theme={theme} />
       </div>
 
-      <div className="px-5 py-4 border-t border-gray-700">
+      {/* CTA */}
+      <div style={{ padding: '16px 20px', borderTop: `1px solid ${theme.panelBorder}` }}>
         <button
           onClick={() => alert(`Enforcement alert sent for ${zone.label}`)}
-          className="w-full bg-red-600 hover:bg-red-500 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors"
+          style={{
+            width: '100%',
+            background: 'linear-gradient(135deg,#ef4444,#dc2626)',
+            color: '#ffffff',
+            fontSize: '14px', fontWeight: 600,
+            padding: '10px',
+            borderRadius: '10px',
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(239,68,68,0.35)',
+            transition: 'opacity 0.2s ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
         >
           🚨 Flag for Enforcement
         </button>
-        <p className="text-gray-600 text-xs text-center mt-2">
+        <p style={{ color: theme.textMuted, fontSize: '11px', textAlign: 'center', marginTop: '8px', transition: 'color 0.3s ease' }}>
           Sends priority alert to nearest patrol unit
         </p>
       </div>
