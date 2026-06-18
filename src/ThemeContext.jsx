@@ -119,7 +119,9 @@ export const THEMES = {
 const ThemeContext = createContext(null)
 
 export function ThemeProvider({ children }) {
-  const [mode, setMode] = useState('dark')
+  // Switched initial state from 'dark' to 'light' 🟢
+  const [mode, setMode] = useState('light')
+  
   const theme = THEMES[mode]
   const toggle = () => setMode(m => m === 'dark' ? 'light' : 'dark')
 
