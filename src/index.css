@@ -1,15 +1,42 @@
+@import "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Clean up default MapLibre Popup white spaces */
+/* MapLibre popup reset */
 .maplibregl-popup-content {
   background: transparent !important;
   box-shadow: none !important;
   padding: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
 }
 
-/* Optional: Smooth transition for map interactions */
+.maplibregl-popup-tip {
+  display: none !important;
+}
+
+.maplibregl-popup-close-button {
+  color: white !important;
+  font-size: 16px !important;
+  padding: 4px 8px !important;
+  right: 0 !important;
+  top: 0 !important;
+  line-height: 1 !important;
+  background: transparent !important;
+}
+
+.maplibregl-popup-close-button:hover {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border-radius: 4px !important;
+}
+
+/* Smooth map canvas */
 .maplibregl-canvas {
-  outline: none;
+  outline: none !important;
+}
+
+/* Attribution small */
+.maplibregl-ctrl-attrib {
+  font-size: 9px !important;
 }
