@@ -1,0 +1,1 @@
+{"total_violations": 247951, "critical_hotspots": 3, "top_zone": "HAL Old Airport", "top_zone_pcis": 93.6, "n_zones": 53, "n_pincodes": 113, "n_clusters": 112, "best_model": "RandomForest", "model_r2": 0.7006558474081404}
