@@ -1,3 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Clean up default MapLibre Popup white spaces */
+.maplibregl-popup-content {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Optional: Smooth transition for map interactions */
+.maplibregl-canvas {
+  outline: none;
+}
