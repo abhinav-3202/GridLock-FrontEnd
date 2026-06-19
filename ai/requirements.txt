@@ -1,0 +1,29 @@
+# Deep Learning
+torch
+torchvision
+torchaudio
+
+# YOLO
+ultralytics
+
+# Computer Vision
+opencv-python
+cvzone
+
+# Data Processing
+numpy
+pandas
+scipy
+
+# Visualization
+matplotlib
+
+# API
+fastapi
+uvicorn
+python-multipart
+
+# Tracking (SORT)
+filterpy
+scikit-image
+lap
