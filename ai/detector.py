@@ -12,12 +12,14 @@ frame, guarded by a lock.
 
 import threading
 import time
-
 import cv2
 import numpy as np
 from ultralytics import YOLO
-
 from sort import Sort
+import torch
+
+print(torch.cuda.is_available())
+print(torch.cuda.get_device_name(0))
 
 # ---------------------------------------------------------------------------
 # Shared state - imported by main.py
@@ -75,6 +77,15 @@ def get_model():
     with _model_lock:
         if _model is None:
             _model = YOLO("yolo11s.pt")
+
+        print("CUDA Available:", torch.cuda.is_available())
+
+        if torch.cuda.is_available():
+            _model.to("cuda")
+            print("Running on GPU")
+        else:
+            print("Running on CPU")
+
     return _model
 
 

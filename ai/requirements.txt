@@ -1,5 +1,7 @@
 # Deep Learning
-
+torch
+torchvision
+torchaudio
 
 # YOLO
 ultralytics
@@ -21,6 +23,7 @@ fastapi
 uvicorn
 python-multipart
 
+# Tracking (SORT)
 filterpy
 scikit-image
 lap
