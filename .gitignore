@@ -30,15 +30,6 @@ ENV/
 models/
 artifacts/
 
-# Individual model files
-*.pkl
-*.pickle
-*.joblib
-*.cbm
-*.h5
-*.keras
-*.onnx
-
 # ==========================================
 # Training Outputs
 # ==========================================
